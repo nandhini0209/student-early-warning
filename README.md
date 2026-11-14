@@ -185,32 +185,6 @@ Open your browser at:
 
 ---
 
-## 🚀 Cloud Deployment Guide (Free & Production Ready)
-
-The application is architected as a **unified full-stack service** (`server.js` serves both the Express REST API and the SPA frontend from `/public`), which means it can be deployed in a single click on platforms like **Render**, **Railway**, or **AWS**.
-
-### Option 1: Deploy on Render.com (Recommended)
-1. Push your repository to **GitHub**.
-2. Log into [Render.com](https://render.com/) and create a new **Web Service**.
-3. Connect your GitHub repository.
-4. Configure service settings:
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-5. In **Environment Variables**, add:
-   - `NODE_ENV` = `production`
-   - `JWT_SECRET` = `<your-secure-random-string>`
-   - `MONGODB_URI` = `mongodb+srv://<user>:<password>@cluster0.mongodb.net/student_early_alert?retryWrites=true&w=majority`
-6. Click **Deploy Web Service**! Once deployed, seed your cloud database by running `node scripts/seed.js` via the Render Shell.
-
-### Option 2: Deploy on Railway.app
-1. Create a project in [Railway.app](https://railway.app/).
-2. Select **Deploy from GitHub repo**.
-3. Add MongoDB Plugin or provide your MongoDB Atlas URI in environment variables.
-4. Railway will automatically detect `package.json` and start via `npm start`.
-
----
-
 ## 🧪 Pre-Configured Test Credentials
 
 | Persona | Email | Password | Primary Interface |

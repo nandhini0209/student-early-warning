@@ -1,0 +1,193 @@
+### Student Early Alert System (SEAS) - REST API Testing
+### Compatible with VS Code "REST Client" Extension (humao.rest-client)
+
+@baseUrl = http://localhost:5000/api
+@adminToken = {{loginAdmin.response.body.data.token}}
+@teacherToken = {{loginTeacher.response.body.data.token}}
+
+# ==============================================================================
+# 🛡️ 1. ADMIN PERSONA ENDPOINTS
+# ==============================================================================
+
+### 1.1 Admin Login
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@college.edu",
+  "password": "Password@123"
+}
+
+### 1.2 Get Institution-Wide Analytics & Caseload
+GET {{baseUrl}}/admin/analytics
+Authorization: Bearer {{adminToken}}
+
+### 1.3 Get All Teachers & Account Status
+GET {{baseUrl}}/admin/teachers
+Authorization: Bearer {{adminToken}}
+
+### 1.4 Create a New Teacher Account
+POST {{baseUrl}}/admin/teachers
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Prof. Alan Turing",
+  "email": "alan.turing@college.edu",
+  "password": "Password@123",
+  "role": "faculty",
+  "department": "Computer Science"
+}
+
+### 1.5 Activate / Deactivate a User Account (Audit Logged)
+PUT {{baseUrl}}/admin/users/653f1a2b3c4d5e6f7a8b9c0d/toggle-status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "reason": "Sabbatical leave approved by Academic Dean"
+}
+
+### 1.6 Get Departments
+GET {{baseUrl}}/admin/departments
+Authorization: Bearer {{adminToken}}
+
+### 1.7 Get Classes
+GET {{baseUrl}}/admin/classes
+Authorization: Bearer {{adminToken}}
+
+### 1.8 Get Subjects & Teacher Mappings
+GET {{baseUrl}}/admin/subjects
+Authorization: Bearer {{adminToken}}
+
+### 1.9 Assign Subject to Teacher
+POST {{baseUrl}}/admin/subjects/assign-teacher
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "subjectId": "653f1a2b3c4d5e6f7a8b9c0d",
+  "teacherId": "653f1a2b3c4d5e6f7a8b9c0e"
+}
+
+### 1.10 Assign Student to Mentor
+POST {{baseUrl}}/admin/students/assign-mentor
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "studentIds": ["653f1a2b3c4d5e6f7a8b9c0d"],
+  "mentorId": "653f1a2b3c4d5e6f7a8b9c0e",
+  "reason": "Class advisory re-assignment for Semester 4"
+}
+
+### 1.11 Get Current Warning Thresholds
+GET {{baseUrl}}/admin/thresholds
+Authorization: Bearer {{adminToken}}
+
+### 1.12 Update Warning Thresholds (Institution-Wide)
+PUT {{baseUrl}}/admin/thresholds
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "attendanceWarning": 75,
+  "attendanceCritical": 65,
+  "marksWarning": 55,
+  "marksCritical": 40,
+  "consecutiveAbsenceLimit": 3,
+  "missingAssignmentLimit": 2,
+  "reason": "Academic Senate regulation update for 2026 academic year"
+}
+
+### 1.13 Admin Academic Record Override (WITH MANDATORY AUDIT TRAIL)
+### (Fails with 400 if reason is omitted!)
+PUT {{baseUrl}}/admin/students/653f1a2b3c4d5e6f7a8b9c0d/override-academics
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "attendancePercentage": 76.0,
+  "averageInternalPercentage": 60.0,
+  "reason": "Verified hospitalization medical certificate submitted (Ref: MED/2026/089)"
+}
+
+### 1.14 View Institutional Audit Trail Logs
+GET {{baseUrl}}/admin/audit-logs
+Authorization: Bearer {{adminToken}}
+
+
+# ==============================================================================
+# 👨‍🏫 2. TEACHER / MENTOR PERSONA ENDPOINTS
+# ==============================================================================
+
+### 2.1 Teacher Login
+# @name loginTeacher
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "faculty@college.edu",
+  "password": "Password@123"
+}
+
+### 2.2 Teacher Dashboard (Assigned Mentees & Critical Alert Counts)
+GET {{baseUrl}}/teacher/dashboard
+Authorization: Bearer {{teacherToken}}
+
+### 2.3 View Assigned Students (With Search & Risk Filter)
+GET {{baseUrl}}/teacher/my-students?riskStatus=CRITICAL
+Authorization: Bearer {{teacherToken}}
+
+### 2.4 Enter / Update Student Marks, Attendance & Assignments
+PUT {{baseUrl}}/teacher/students/653f1a2b3c4d5e6f7a8b9c0d/records
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+  "courseCode": "CS401",
+  "courseName": "Full Stack Development 2",
+  "attendedClasses": 26,
+  "totalClasses": 30,
+  "internalMarks": 42,
+  "maxInternalMarks": 50,
+  "submittedAssignments": 5,
+  "totalAssignments": 5,
+  "consecutiveAbsences": 0,
+  "remarks": "Significant improvement in lab work and attendance"
+}
+
+### 2.5 View Student Performance Trends & Historical Trajectory
+GET {{baseUrl}}/teacher/students/653f1a2b3c4d5e6f7a8b9c0d/trends
+Authorization: Bearer {{teacherToken}}
+
+### 2.6 View Teacher Alerts for Assigned Mentees (With Root Causes)
+GET {{baseUrl}}/teacher/alerts
+Authorization: Bearer {{teacherToken}}
+
+### 2.7 Log Guidance & Schedule Follow-Up Session
+POST {{baseUrl}}/teacher/interventions
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+  "studentId": "653f1a2b3c4d5e6f7a8b9c0d",
+  "actionType": "ONE_ON_ONE_COUNSELING",
+  "discussionNotes": "Counseling conducted regarding missed mid-term quizzes and sleep schedule distress.",
+  "actionItems": "1. Attend morning lab. 2. Submit pending assignment 3.",
+  "followUpDate": "2026-11-05"
+}
+
+### 2.8 Mark Intervention Completed & Measure Improvement
+PUT {{baseUrl}}/teacher/interventions/653f1a2b3c4d5e6f7a8b9c0e/complete
+Authorization: Bearer {{teacherToken}}
+Content-Type: application/json
+
+{
+  "outcome": "Student attended all remedial sessions and caught up on all pending homework."
+}
+
+### 2.9 View Intervention History for Student
+GET {{baseUrl}}/teacher/students/653f1a2b3c4d5e6f7a8b9c0d/intervention-history
+Authorization: Bearer {{teacherToken}}

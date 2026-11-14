@@ -1,0 +1,17 @@
+{
+  "name": "student-early-alert-frontend",
+  "version": "1.0.0",
+  "description": "Frontend UI Client for Student Early Alert System (FSD 2)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "frontend",
+    "fsd2",
+    "dashboard"
+  ],
+  "author": "Student Developer",
+  "license": "ISC"
+}

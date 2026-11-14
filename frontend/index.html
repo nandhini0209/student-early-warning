@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEAS - Student Early Alert System (FSD 2)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ================= 1. AUTHENTICATION LANDING SCREEN (STARTING PAGE) ================= -->
+  <div id="app-auth" class="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-tr from-slate-950 via-indigo-950 to-slate-900 text-slate-100 z-50">
+    <div class="max-w-md w-full space-y-6">
+      
+      <!-- Brand & Header -->
+      <div class="text-center space-y-2">
+        <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-500 items-center justify-center text-white font-black text-2xl shadow-xl shadow-indigo-500/25 mb-1">
+          SE
+        </div>
+        <h1 class="text-3xl font-black tracking-tight text-white">EarlyAlert<span class="text-indigo-400">Pro</span></h1>
+        <p class="text-xs text-indigo-200 max-w-sm mx-auto">Institution-Wide Student Retention & Mentorship Platform (FSD 2)</p>
+      </div>
+
+      <!-- Auth Card -->
+      <div class="bg-white rounded-3xl p-6 sm:p-7 shadow-2xl text-slate-800 space-y-5">
+        
+        <!-- Tabs: Login vs Register -->
+        <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200 text-xs font-bold">
+          <button id="tab-btn-login" onclick="toggleAuthTab('login')" class="py-2.5 rounded-xl bg-white text-indigo-700 shadow-xs transition">
+            Sign In
+          </button>
+          <button id="tab-btn-register" onclick="toggleAuthTab('register')" class="py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
+            Create Account
+          </button>
+        </div>
+
+        <!-- ================= LOGIN TAB ================= -->
+        <div id="auth-panel-login" class="space-y-4">
+          <!-- Institutional Sign-In Form -->
+          <form onsubmit="handleManualLogin(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Institutional Email</label>
+              <input type="email" id="login-email" required placeholder="e.g. yourname@college.edu" class="w-full text-xs rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:border-indigo-500 bg-slate-50">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Password</label>
+              <input type="password" id="login-password" required placeholder="••••••••" class="w-full text-xs rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:border-indigo-500 bg-slate-50">
+            </div>
+
+            <button type="submit" id="btn-login-submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 transition mt-1 flex items-center justify-center space-x-2">
+              <span>Sign In to Dashboard &rarr;</span>
+            </button>
+          </form>
+
+          <!-- Discreet Demo Accounts Helper for Viva / Evaluator Testing (Collapsible, No Data Leakage) -->
+          <details class="text-xs border border-slate-200 rounded-2xl p-2.5 bg-slate-50/70 transition">
+            <summary class="cursor-pointer text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center justify-between">
+              <span class="flex items-center space-x-1.5"><span>🧪</span><span>Evaluation & Demo Accounts</span></span>
+              <span class="text-slate-400 text-[10px]">Tap to reveal</span>
+            </summary>
+            <div class="mt-2.5 pt-2 border-t border-slate-200 space-y-2">
+              <p class="text-[10px] text-slate-500">1-click test personas for college presentation:</p>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" onclick="authQuickLogin('admin@college.edu', 'Password@123')" class="p-2 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-900 text-left transition space-y-0.5">
+                  <div class="text-[11px] font-bold flex items-center space-x-1"><span>🛡️</span><span>Admin</span></div>
+                  <div class="text-[9px] text-purple-600 truncate">Dean Affairs</div>
+                </button>
+
+                <button type="button" onclick="authQuickLogin('faculty@college.edu', 'Password@123')" class="p-2 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-900 text-left transition space-y-0.5">
+                  <div class="text-[11px] font-bold flex items-center space-x-1"><span>👨‍🏫</span><span>Faculty</span></div>
+                  <div class="text-[9px] text-blue-600 truncate">Dr. Smith</div>
+                </button>
+
+                <button type="button" onclick="authQuickLogin('rahul.sharma@student.edu', 'Password@123')" class="p-2 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 text-left transition space-y-0.5">
+                  <div class="text-[11px] font-bold flex items-center space-x-1"><span>🎓</span><span>Student</span></div>
+                  <div class="text-[9px] text-amber-600 truncate">Rahul Sharma</div>
+                </button>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- ================= REGISTER TAB ================= -->
+        <div id="auth-panel-register" class="hidden space-y-3">
+          <form onsubmit="handleManualRegister(event)" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Full Name *</label>
+              <input type="text" id="reg-name" required placeholder="e.g. Srivalli Devi" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Institutional Email *</label>
+              <input type="email" id="reg-email" required placeholder="srivalli@student.edu" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Password (Min 6 Characters) *</label>
+              <input type="password" id="reg-password" required minlength="6" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Account Role *</label>
+                <select id="reg-role" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+                  <option value="student" selected>Student</option>
+                  <option value="faculty">Teacher / Mentor</option>
+                  <option value="advisor">Academic Advisor</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Department *</label>
+                <select id="reg-dept" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Electronics">Electronics</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Student Class & Section Configuration -->
+            <div id="reg-student-meta" class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Current Semester *</label>
+                <select id="reg-semester" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4" selected>Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Section *</label>
+                <input type="text" id="reg-section" value="A" placeholder="A, B, C" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50 text-center uppercase">
+              </div>
+            </div>
+
+            <p class="text-[10px] text-slate-500 leading-tight">Upon registration, a dedicated Faculty Mentor from your department will be automatically assigned to your academic profile.</p>
+
+            <button type="submit" id="btn-register-submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-100 transition mt-1">
+              Create Account & Sign In &rarr;
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <div class="text-center text-[11px] text-slate-400">
+        Student Early Alert System • Full Stack Development II
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= 2. AUTHENTICATED APPLICATION DASHBOARD ================= -->
+  <div id="app-authenticated" class="hidden min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <!-- Brand & Project Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-100">
+            SE
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="font-bold text-base text-slate-900 tracking-tight">EarlyAlert<span class="text-indigo-600">Pro</span></span>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 tracking-wider">FSD 2 Capstone</span>
+            </div>
+            <p class="text-[11px] text-slate-500 hidden sm:block">Institution-Wide Student Retention & Mentorship Platform</p>
+          </div>
+        </div>
+
+        <!-- Institutional Status & User Profile with LOGOUT -->
+        <div class="flex items-center space-x-3">
+          <div class="hidden sm:flex items-center space-x-2 bg-indigo-50/80 px-3 py-1.5 rounded-xl border border-indigo-100 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="header-campus-status" class="font-bold text-indigo-900">Campus Cloud Active</span>
+          </div>
+
+          <!-- Active User Badge -->
+          <div class="flex items-center space-x-3 border-l border-slate-200 pl-3">
+            <div class="text-right">
+              <div id="user-name-display" class="text-xs font-bold text-slate-800">User</div>
+              <span id="user-role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">ROLE</span>
+            </div>
+            <!-- Prominent Logout Button -->
+            <button onclick="handleLogout()" title="Sign Out of SEAS" class="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition flex items-center space-x-1 shadow-xs">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+  <!-- Main Body with Sidebar & Content Area -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col md:flex-row gap-6">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-64 shrink-0 space-y-4">
+      
+      <!-- Role Navigation Card -->
+      <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm space-y-1">
+        
+        <!-- ================= ADMIN NAVIGATION LINKS ================= -->
+        <div id="nav-group-admin" class="space-y-1">
+          <div class="px-3 py-1 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Admin Controls</div>
+          
+          <button onclick="switchTab('admin-analytics')" data-tab="admin-analytics" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span>Institution Analytics</span>
+          </button>
+
+          <button onclick="switchTab('admin-teachers')" data-tab="admin-teachers" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <span>Teachers & Accounts</span>
+          </button>
+
+          <button onclick="switchTab('admin-students')" data-tab="admin-students" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>Manage Students & Mentors</span>
+          </button>
+
+          <button onclick="switchTab('admin-academics')" data-tab="admin-academics" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <span>Depts, Classes & Subjects</span>
+          </button>
+
+          <button onclick="switchTab('admin-thresholds')" data-tab="admin-thresholds" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+            <span>Warning Thresholds</span>
+          </button>
+
+          <button onclick="switchTab('admin-audit')" data-tab="admin-audit" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span>Audit Trail Logs</span>
+          </button>
+
+          <button onclick="switchTab('alerts')" data-tab="alerts" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span>All System Alerts</span>
+          </button>
+        </div>
+
+        <!-- ================= TEACHER / MENTOR NAVIGATION LINKS ================= -->
+        <div id="nav-group-teacher" class="space-y-1">
+          <div class="px-3 py-1 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Teacher / Mentor</div>
+          
+          <button onclick="switchTab('teacher-dashboard')" data-tab="teacher-dashboard" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <span>Teacher Dashboard</span>
+          </button>
+
+          <button onclick="switchTab('teacher-students')" data-tab="teacher-students" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span>My Assigned Students</span>
+          </button>
+
+          <button onclick="switchTab('teacher-alerts')" data-tab="teacher-alerts" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span>My Early-Warning Alerts</span>
+          </button>
+
+          <button onclick="switchTab('teacher-interventions')" data-tab="teacher-interventions" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <span>Guidance & Follow-Ups</span>
+          </button>
+        </div>
+
+        <!-- ================= STUDENT SELF-SERVICE PORTAL ================= -->
+        <div class="pt-2 border-t border-slate-100">
+          <button onclick="switchTab('student-portal')" data-tab="student-portal" class="nav-link w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            <span>Student Self-Service</span>
+          </button>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- Main Dynamic Content Views -->
+    <main class="flex-1 space-y-6">
+
+      <!-- ================= 1. ADMIN: INSTITUTION ANALYTICS ================= -->
+      <section id="view-admin-analytics" class="space-y-6">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Institution-Wide Early Alert Analytics</h2>
+            <p class="text-xs text-slate-500">Global academic risk monitoring, department comparisons, and teacher mentorship caseload</p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">Executive View</span>
+        </div>
+
+        <!-- Admin KPI Metric Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">Total Enrolled Students</span>
+            <div id="admin-stat-total-students" class="text-2xl font-black text-slate-900 mt-1">0</div>
+            <span class="text-[11px] text-emerald-600 font-semibold" id="admin-stat-active-students">0 Active</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-red-200 bg-red-50/20 shadow-sm">
+            <span class="text-xs font-medium text-red-600">Critical At-Risk</span>
+            <div id="admin-stat-critical" class="text-2xl font-black text-red-600 mt-1">0</div>
+            <span class="text-[11px] text-red-400">Immediate attention</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">Faculty Mentors</span>
+            <div id="admin-stat-teachers" class="text-2xl font-black text-indigo-600 mt-1">0</div>
+            <span class="text-[11px] text-slate-400" id="admin-stat-depts">0 Departments</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">Audit Trail Records</span>
+            <div id="admin-stat-audits" class="text-2xl font-black text-purple-600 mt-1">0</div>
+            <span class="text-[11px] text-purple-400">Policy verified</span>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">Campus Risk Distribution</h3>
+            <div class="h-64 relative">
+              <canvas id="chart-admin-risk"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-slate-800">Department Performance Breakdown</h3>
+            <div class="h-64 relative">
+              <canvas id="chart-admin-dept"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teacher Mentorship Caseload Table -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <h3 class="font-bold text-base text-slate-900">Faculty Mentorship Caseload & Monitoring Status</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                  <th class="py-2.5 px-3">Teacher / Mentor</th>
+                  <th class="py-2.5 px-3">Department</th>
+                  <th class="py-2.5 px-3">Account Status</th>
+                  <th class="py-2.5 px-3">Assigned Students</th>
+                  <th class="py-2.5 px-3">Critical Mentees</th>
+                </tr>
+              </thead>
+              <tbody id="admin-caseload-table-body" class="divide-y divide-slate-100 text-xs">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= 2. ADMIN: TEACHERS & ACCOUNTS ================= -->
+      <section id="view-admin-teachers" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Teacher & Account Management</h2>
+            <p class="text-xs text-slate-500">Create faculty mentors, assign departments, and manage active/inactive account status</p>
+          </div>
+          <button onclick="openCreateTeacherModal()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100 transition">
+            + Create New Teacher
+          </button>
+        </div>
+
+        <!-- Teachers Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="py-3 px-4">Name</th>
+                  <th class="py-3 px-4">Email</th>
+                  <th class="py-3 px-4">Role</th>
+                  <th class="py-3 px-4">Department</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Account Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-teachers-table-body" class="divide-y divide-slate-100 text-xs">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. ADMIN: MANAGE STUDENTS & MENTORS ================= -->
+      <section id="view-admin-students" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Student Directory & Mentor Allocation</h2>
+            <p class="text-xs text-slate-500">Assign students to teacher mentors and manage student registrations</p>
+          </div>
+          <button onclick="openCreateStudentModal()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100 transition">
+            + Register New Student
+          </button>
+        </div>
+
+        <!-- Students Roster for Admin -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="py-3 px-4">Roll No</th>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Department</th>
+                  <th class="py-3 px-4">Assigned Mentor</th>
+                  <th class="py-3 px-4">Risk Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-students-table-body" class="divide-y divide-slate-100 text-xs">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. ADMIN: ACADEMIC STRUCTURE ================= -->
+      <section id="view-admin-academics" class="hidden space-y-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <h2 class="font-black text-xl text-slate-900">Academic Structure Configuration</h2>
+          <p class="text-xs text-slate-500">Manage Departments, Classes, Subjects, and map Subjects to Teachers</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Departments Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-slate-800">Departments</h3>
+              <button onclick="promptCreateDept()" class="text-xs text-indigo-600 font-bold hover:underline">+ Add</button>
+            </div>
+            <div id="admin-dept-list" class="space-y-2 text-xs">
+              <!-- Injected by app.js -->
+            </div>
+          </div>
+
+          <!-- Classes Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-slate-800">Classes & Sections</h3>
+              <button onclick="promptCreateClass()" class="text-xs text-indigo-600 font-bold hover:underline">+ Add</button>
+            </div>
+            <div id="admin-class-list" class="space-y-2 text-xs">
+              <!-- Injected by app.js -->
+            </div>
+          </div>
+
+          <!-- Subjects Card -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-slate-800">Subjects & Teacher Mapping</h3>
+              <button onclick="promptCreateSubject()" class="text-xs text-indigo-600 font-bold hover:underline">+ Add</button>
+            </div>
+            <div id="admin-subject-list" class="space-y-2 text-xs">
+              <!-- Injected by app.js -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= 5. ADMIN: WARNING THRESHOLDS ================= -->
+      <section id="view-admin-thresholds" class="hidden space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 max-w-2xl">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Configure Institutional Warning Thresholds</h2>
+            <p class="text-xs text-slate-500">Fine-tune institutional early-warning trigger benchmarks across all academic models</p>
+          </div>
+
+          <div class="space-y-4 pt-2 text-xs">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Attendance Warning Threshold (%)</label>
+                <input type="number" id="th-att-warning" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Institutional advisory level (Default: 75%)</span>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Attendance Critical Threshold (%)</label>
+                <input type="number" id="th-att-critical" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Exam debarment risk (Default: 65%)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Marks Warning Benchmark (%)</label>
+                <input type="number" id="th-marks-warning" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Continuous evaluation warning (Default: 55%)</span>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Marks Critical Benchmark (%)</label>
+                <input type="number" id="th-marks-critical" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Course fail danger line (Default: 40%)</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Consecutive Absence Limit (Days)</label>
+                <input type="number" id="th-abs-limit" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Triggers urgent alert (Default: 3 days)</span>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Missing Assignment Overdue Limit</label>
+                <input type="number" id="th-assign-limit" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+                <span class="text-[10px] text-slate-400">Triggers assessment backlog (Default: 2)</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Reason for Threshold Modification (Audit Trail)</label>
+              <input type="text" id="th-reason" placeholder="e.g. Academic Council resolution 2026-B" class="w-full rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+            </div>
+
+            <div class="pt-3">
+              <button onclick="submitThresholdUpdate()" class="px-5 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100 transition">
+                Save & Apply Thresholds Campus-Wide
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. ADMIN: MANDATORY AUDIT TRAIL ================= -->
+      <section id="view-admin-audit" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Institutional Audit Trail Logs</h2>
+            <p class="text-xs text-slate-500">Immutable audit log of administrative overrides, threshold changes, and mentor allocations</p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">Policy Compliance</span>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                  <th class="py-3 px-4">Timestamp</th>
+                  <th class="py-3 px-4">Action Type</th>
+                  <th class="py-3 px-4">Performed By</th>
+                  <th class="py-3 px-4">Target Student</th>
+                  <th class="py-3 px-4">Field Changed</th>
+                  <th class="py-3 px-4">Documented Justification / Reason</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-table-body" class="divide-y divide-slate-100 text-xs">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. TEACHER: DASHBOARD ================= -->
+      <section id="view-teacher-dashboard" class="hidden space-y-6">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Teacher & Mentor Workstation</h2>
+            <p class="text-xs text-slate-500">Monitoring assigned mentees, academic progress, and scheduled intervention follow-ups</p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">Mentor Mode</span>
+        </div>
+
+        <!-- Teacher KPI Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">My Assigned Mentees</span>
+            <div id="teacher-stat-assigned" class="text-2xl font-black text-slate-900 mt-1">0</div>
+            <span class="text-[11px] text-slate-400">Direct Mentorship</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-red-200 bg-red-50/20 shadow-sm">
+            <span class="text-xs font-medium text-red-600">Critical Mentees</span>
+            <div id="teacher-stat-critical" class="text-2xl font-black text-red-600 mt-1">0</div>
+            <span class="text-[11px] text-red-400 font-semibold">Immediate Action Required</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">Active Mentee Alerts</span>
+            <div id="teacher-stat-alerts" class="text-2xl font-black text-amber-600 mt-1">0</div>
+            <span class="text-[11px] text-slate-400">Open early warnings</span>
+          </div>
+
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs font-medium text-slate-500">Pending Follow-Ups</span>
+            <div id="teacher-stat-followups" class="text-2xl font-black text-emerald-600 mt-1">0</div>
+            <span class="text-[11px] text-slate-400">Scheduled counseling</span>
+          </div>
+        </div>
+
+        <!-- Subjects Taught Row -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <h3 class="font-bold text-sm text-slate-800">My Teaching Subjects</h3>
+          <div id="teacher-subjects-list" class="flex flex-wrap gap-3 text-xs">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+
+        <!-- Quick At-Risk Mentees Feed -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-base text-slate-900">Mentees Requiring Immediate Attention</h3>
+            <button onclick="switchTab('teacher-students')" class="text-xs font-semibold text-indigo-600 hover:underline">
+              View All Assigned Mentees &rarr;
+            </button>
+          </div>
+          <div id="teacher-urgent-mentees" class="space-y-3">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= 8. TEACHER: ASSIGNED STUDENTS ================= -->
+      <section id="view-teacher-students" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="font-black text-xl text-slate-900">Assigned Student Roster</h2>
+              <p class="text-xs text-slate-500">Search, filter, view performance trends, and record continuous marks & attendance</p>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <input type="text" id="teacher-filter-search" placeholder="Search by roll no or name..." class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+            <select id="teacher-filter-risk" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+              <option value="All">All Risk Tiers</option>
+              <option value="CRITICAL">🔴 Critical Risk</option>
+              <option value="MODERATE">🟡 Moderate Warning</option>
+              <option value="SAFE">🟢 Safe Standing</option>
+            </select>
+            <select id="teacher-filter-view" class="w-full text-xs rounded-xl border border-slate-200 px-3 py-2 bg-slate-50">
+              <option value="mentees">Only My Assigned Mentees</option>
+              <option value="all">All Enrolled Students</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-slate-50/75 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="py-3 px-4">Roll No</th>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Attendance</th>
+                  <th class="py-3 px-4">Internals Avg</th>
+                  <th class="py-3 px-4">Trend</th>
+                  <th class="py-3 px-4">Risk Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teacher-students-table-body" class="divide-y divide-slate-100 text-xs">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 9. TEACHER: EARLY WARNING ALERTS & REASONS ================= -->
+      <section id="view-teacher-alerts" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <h2 class="font-black text-xl text-slate-900">Mentee Early-Warning Alert Stream</h2>
+          <p class="text-xs text-slate-500">Direct visibility into root-cause triggers: attendance deficits, assessment failures, and consecutive absences</p>
+        </div>
+
+        <div id="teacher-alerts-container" class="space-y-3">
+          <!-- Injected via app.js -->
+        </div>
+      </section>
+
+      <!-- ================= 10. TEACHER: GUIDANCE & INTERVENTIONS ================= -->
+      <section id="view-teacher-interventions" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="font-black text-xl text-slate-900">Guidance, Counseling & Follow-Up Studio</h2>
+            <p class="text-xs text-slate-500">Log 1-on-1 counseling, schedule follow-ups, and monitor post-intervention risk improvement</p>
+          </div>
+        </div>
+
+        <div id="teacher-interventions-container" class="space-y-3">
+          <!-- Injected via app.js -->
+        </div>
+      </section>
+
+      <!-- ================= 11. GENERAL: ALERTS ================= -->
+      <section id="view-alerts" class="hidden space-y-5">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <h2 class="font-black text-xl text-slate-900">Institution Alert Center</h2>
+          <p class="text-xs text-slate-500">Comprehensive list of all triggered early-warning signals across the institution</p>
+        </div>
+        <div id="alerts-list-container" class="space-y-3">
+          <!-- Injected via app.js -->
+        </div>
+      </section>
+
+      <!-- ================= 12. STUDENT: SELF-SERVICE PORTAL ================= -->
+      <section id="view-student-portal" class="hidden space-y-6">
+        <!-- Hero Header -->
+        <div class="bg-gradient-to-r from-indigo-700 via-indigo-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl space-y-2">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center space-x-2 text-indigo-200 text-xs font-semibold uppercase tracking-wider">
+              <span>🎓 Student Academic Standing Portal</span>
+            </div>
+            <span id="portal-standing-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              Good Academic Standing
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold" id="portal-student-name">Student</h2>
+          <div class="flex items-center space-x-3 text-xs text-indigo-200 flex-wrap">
+            <span id="portal-student-roll" class="font-mono bg-white/10 px-2.5 py-0.5 rounded-md font-bold">21CS001</span>
+            <span id="portal-student-dept">Computer Science • Semester 4 • Section A</span>
+          </div>
+        </div>
+
+        <!-- Designated Faculty Mentor & Guidance Card (PROMINENT) -->
+        <div class="bg-white rounded-3xl p-6 border-2 border-indigo-100 shadow-md space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-start space-x-4">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-extrabold text-2xl flex items-center justify-center shrink-0 shadow-md shadow-indigo-100">
+                👨‍🏫
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center space-x-2">
+                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 tracking-wider">Your Assigned Faculty Mentor</span>
+                  <span id="portal-mentor-status" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">🟢 Active Mentorship</span>
+                </div>
+                <h3 id="portal-mentor-name" class="text-lg font-black text-slate-900">Dr. Robert Smith</h3>
+                <p id="portal-mentor-dept" class="text-xs text-slate-500">Associate Professor • Dept of Computer Science & Engineering</p>
+                <p class="text-xs text-indigo-600 font-semibold flex items-center space-x-1">
+                  <span>✉️</span>
+                  <span id="portal-mentor-email">faculty@college.edu</span>
+                  <span class="text-slate-300 mx-1">•</span>
+                  <span class="text-slate-500">Office Hours: Mon-Fri 10:00 AM - 4:00 PM</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Student Action Button to Reach Out to Assigned Faculty -->
+            <button onclick="openRequestGuidanceModal()" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-100 flex items-center justify-center space-x-2 transition shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+              <span>Request Guidance / Counseling</span>
+            </button>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1">
+            <span class="font-bold text-slate-800">💡 Faculty Mentorship Role in SEAS:</span>
+            <p class="text-[11px] leading-relaxed text-slate-500">Your assigned mentor reviews your weekly attendance, internal exam scores, and continuous assignment progress. If your metrics approach warning thresholds, your mentor coordinates personalized counseling, remedial sessions, or action plans to safeguard your exam eligibility.</p>
+          </div>
+        </div>
+
+        <!-- 4-Metric Academic Telemetry Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs font-semibold text-slate-500">Academic Risk Index</span>
+            <div id="portal-risk-score" class="text-3xl font-black text-slate-900">0/100</div>
+            <div class="mt-1 text-xs">Status: <span id="portal-risk-status" class="font-bold text-emerald-600">SAFE</span></div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs font-semibold text-slate-500">Overall Attendance</span>
+            <div id="portal-attendance-val" class="text-3xl font-black text-slate-900">0%</div>
+            <p class="text-[11px] text-slate-400">Mandatory 75% institutional floor</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs font-semibold text-slate-500">Continuous Assessment (CIE)</span>
+            <div id="portal-internals-val" class="text-3xl font-black text-slate-900">0%</div>
+            <p class="text-[11px] text-slate-400">Average internal exam percentage</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-xs font-semibold text-slate-500">Assignment Status</span>
+            <div id="portal-assignments-val" class="text-3xl font-black text-slate-900">0 Missing</div>
+            <p class="text-[11px] text-slate-400">Evaluation assignment submissions</p>
+          </div>
+        </div>
+
+        <!-- Faculty Guidance Notes & Action Plan -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div>
+              <h3 class="font-bold text-sm text-slate-900 flex items-center space-x-1.5">
+                <span>📋 Guidance Notes & Action Items from Faculty Mentor</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Direct advice, remedial schedules, and recovery milestones recorded by your mentor</p>
+            </div>
+            <span class="text-xs text-indigo-600 font-semibold" id="portal-guidance-count">0 Sessions</span>
+          </div>
+
+          <div id="portal-guidance-list" class="space-y-2.5">
+            <!-- Populated via app.js -->
+          </div>
+        </div>
+
+        <!-- Academic Recovery Advisory Bulletins -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <h3 class="font-bold text-sm text-slate-800">💡 Academic Recovery Guidance & Alerts</h3>
+          <ul id="portal-recommendations" class="space-y-2"></ul>
+        </div>
+
+        <!-- Comprehensive Course Performance Table -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div>
+              <h3 class="font-bold text-sm text-slate-800">Course-Wise Attendance & Continuous Evaluation</h3>
+              <p class="text-[11px] text-slate-500">Live academic telemetry per registered subject for Semester 4</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase">
+                  <th class="py-2.5 px-3">Subject / Course</th>
+                  <th class="py-2.5 px-3">Attendance (Classes)</th>
+                  <th class="py-2.5 px-3">Attendance %</th>
+                  <th class="py-2.5 px-3">Internal Exam Marks</th>
+                  <th class="py-2.5 px-3">Assignments</th>
+                  <th class="py-2.5 px-3">Examination Standing</th>
+                </tr>
+              </thead>
+              <tbody id="portal-subjects-body" class="divide-y divide-slate-100 text-xs"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Real-Life College Workflow Infographic -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-3xl p-6 shadow-lg space-y-4">
+          <div class="space-y-1">
+            <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">Institutional Framework</span>
+            <h3 class="text-lg font-black">How Early Alert & Retention Operates in Our College</h3>
+            <p class="text-xs text-indigo-200">A multi-stage proactive intervention model designed to prevent exam debarment and academic dropout.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+            <div class="p-3.5 bg-white/5 border border-white/10 rounded-2xl space-y-1.5">
+              <span class="w-6 h-6 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">1</span>
+              <h4 class="font-bold text-white text-xs">Faculty Telemetry Sync</h4>
+              <p class="text-[11px] text-indigo-200">Course teachers enter weekly lecture attendance and continuous internal marks (CIE).</p>
+            </div>
+
+            <div class="p-3.5 bg-white/5 border border-white/10 rounded-2xl space-y-1.5">
+              <span class="w-6 h-6 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">2</span>
+              <h4 class="font-bold text-white text-xs">AI Risk Scoring Engine</h4>
+              <p class="text-[11px] text-indigo-200">Composite weighted formula (Attendance 40% + Marks 35% + Assignments 15% + Consecutive Absences 10%).</p>
+            </div>
+
+            <div class="p-3.5 bg-white/5 border border-white/10 rounded-2xl space-y-1.5">
+              <span class="w-6 h-6 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">3</span>
+              <h4 class="font-bold text-white text-xs">Automated Mentor Alert</h4>
+              <p class="text-[11px] text-indigo-200">If thresholds breach (&lt;75% attendance or &lt;40% marks), the assigned faculty mentor receives an instant alert.</p>
+            </div>
+
+            <div class="p-3.5 bg-white/5 border border-white/10 rounded-2xl space-y-1.5">
+              <span class="w-6 h-6 rounded-full bg-indigo-500 text-white font-black text-xs flex items-center justify-center">4</span>
+              <h4 class="font-bold text-white text-xs">Guided Recovery</h4>
+              <p class="text-[11px] text-indigo-200">Mentor conducts 1-on-1 counseling, assigns remedial support, and documents recovery before semester exams.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+  </div> <!-- /#app-authenticated -->
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal: Student Request Guidance from Faculty Mentor -->
+  <div id="modal-request-guidance" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 flex items-center space-x-1.5">
+            <span>💬 Request Faculty Guidance / Appointment</span>
+          </h3>
+          <p class="text-[11px] text-slate-500">Your request will be routed directly to your assigned faculty mentor</p>
+        </div>
+        <button onclick="closeRequestGuidanceModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div class="p-3 bg-indigo-50/70 rounded-2xl border border-indigo-100 text-xs text-indigo-900 flex items-center space-x-2.5">
+        <span class="text-xl">👨‍🏫</span>
+        <div>
+          <span class="font-bold block">Assigned Mentor: <span id="rg-mentor-name">Faculty Mentor</span></span>
+          <span class="text-[11px] text-indigo-700" id="rg-mentor-email">faculty@college.edu</span>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Guidance Topic / Category *</label>
+          <select id="rg-action-type" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <option value="ONE_ON_ONE_COUNSELING">1-on-1 Academic Counseling & Study Plan</option>
+            <option value="REMEDIAL_CLASS">Remedial Class & Subject Difficulty Support</option>
+            <option value="PARENT_CONFERENCE">Attendance Shortage & Exam Concession</option>
+            <option value="PEER_TUTORING">Peer Tutoring & Assignment Extension</option>
+            <option value="WELLNESS_CHECK">Academic Stress / Career Mentorship</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Urgency Priority</label>
+          <select id="rg-urgency" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <option value="MEDIUM">Normal (Response within 2-3 working days)</option>
+            <option value="HIGH">High (Upcoming Continuous Evaluation / Exam Debarment Risk)</option>
+            <option value="CRITICAL">Critical (Immediate Advisory Intervention Required)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Your Note or Question for the Mentor *</label>
+          <textarea id="rg-notes" rows="3" placeholder="Explain the subject difficulties, attendance shortage, or guidance you need from your faculty mentor..." class="w-full rounded-xl border border-slate-300 px-3 py-2 focus:outline-none focus:border-indigo-500 bg-slate-50"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeRequestGuidanceModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitStudentGuidanceRequest()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100">
+          Send Guidance Request &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Teacher Enter Marks & Attendance -->
+  <div id="modal-teacher-record" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-base text-slate-900">Enter / Update Student Performance Records</h3>
+        <button onclick="closeTeacherRecordModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="tr-student-id">
+      <p class="text-xs text-slate-500">Updating records for: <strong id="tr-student-name" class="text-slate-800">Student</strong></p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Course / Subject</label>
+          <select id="tr-course-code" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <option value="CS401">CS401 - Full Stack Development 2</option>
+            <option value="CS402">CS402 - Database Management Systems</option>
+            <option value="CS403">CS403 - Design and Analysis of Algorithms</option>
+            <option value="CS404">CS404 - Computer Networks</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Attended Classes</label>
+            <input type="number" id="tr-attended" min="0" max="50" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Total Classes</label>
+            <input type="number" id="tr-total-classes" min="1" max="50" value="30" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Internal Exam Marks (Max 50)</label>
+            <input type="number" id="tr-internal-marks" min="0" max="50" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Consecutive Absences (Days)</label>
+            <input type="number" id="tr-consecutive-abs" min="0" max="15" value="0" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Submitted Assignments</label>
+            <input type="number" id="tr-submitted-assign" min="0" max="10" value="4" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Total Assignments Given</label>
+            <input type="number" id="tr-total-assign" min="1" max="10" value="5" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Teacher Remarks / Academic Notes</label>
+          <input type="text" id="tr-remarks" placeholder="e.g. Good progress in lab; needs theory revision." class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeTeacherRecordModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitTeacherRecord()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100">
+          Save Record & Re-evaluate Risk
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Teacher Log Guidance & Schedule Follow-Up -->
+  <div id="modal-teacher-guidance" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-base text-slate-900">Add Guidance & Schedule Follow-Up</h3>
+        <button onclick="closeGuidanceModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="gd-student-id">
+      <input type="hidden" id="gd-alert-id">
+      <p class="text-xs text-slate-500">Student: <strong id="gd-student-name" class="text-slate-800">Student</strong></p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Intervention / Guidance Type</label>
+          <select id="gd-action-type" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <option value="ONE_ON_ONE_COUNSELING">1-on-1 Academic Counseling</option>
+            <option value="REMEDIAL_CLASS">Remedial Class Assignment</option>
+            <option value="PARENT_CONFERENCE">Parent Conference</option>
+            <option value="PEER_TUTORING">Peer Tutoring Pairing</option>
+            <option value="WELLNESS_CHECK">Student Wellness Check</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Discussion & Root Cause Notes</label>
+          <textarea id="gd-discussion-notes" rows="3" placeholder="Discuss attendance deficit, academic difficulties, or health concerns..." class="w-full rounded-xl border border-slate-300 px-3 py-2"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Agreed Action Items / Commitments</label>
+          <input type="text" id="gd-action-items" placeholder="e.g. Attend morning lab, submit backlog by Friday" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Scheduled Follow-Up Date</label>
+          <input type="date" id="gd-followup-date" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeGuidanceModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitGuidanceSession()" class="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md shadow-emerald-100">
+          Save Guidance & Schedule
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Admin Academic Record Override (WITH MANDATORY AUDIT TRAIL) -->
+  <div id="modal-admin-override" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <div>
+          <h3 class="font-bold text-base text-red-600 flex items-center space-x-1.5">
+            <span>🛡️ Administrative Academic Record Override</span>
+          </h3>
+          <p class="text-[11px] text-slate-500">Policy: Mandatory Audit Trail Required</p>
+        </div>
+        <button onclick="closeAdminOverrideModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="ao-student-id">
+      <p class="text-xs text-slate-600">Overriding records for: <strong id="ao-student-name" class="text-slate-900">Student</strong></p>
+
+      <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 space-y-1">
+        <p class="font-bold">⚠️ Compliance Warning:</p>
+        <p class="text-[11px] leading-relaxed">Admin cannot modify a student's academic record without entering an official documented justification. This action is permanently logged to the Institutional Audit Trail.</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">New Attendance Percentage (0 - 100%)</label>
+          <input type="number" id="ao-attendance" min="0" max="100" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">New Average Internal Percentage (0 - 100%)</label>
+          <input type="number" id="ao-marks" min="0" max="100" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-800 mb-1">Mandatory Audit Justification / Reason *</label>
+          <textarea id="ao-reason" rows="3" placeholder="e.g. Approved medical certificate (Ref #MED-2026-99) or academic board concession..." class="w-full rounded-xl border border-red-300 px-3 py-2 focus:outline-none focus:border-red-500 bg-red-50/20"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeAdminOverrideModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitAdminAcademicOverride()" class="px-4 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-md shadow-red-100">
+          Sign & Log Academic Override
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Assign Mentor to Student -->
+  <div id="modal-assign-mentor" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-base text-slate-900">Assign Teacher / Mentor</h3>
+        <button onclick="closeAssignMentorModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <input type="hidden" id="am-student-id">
+      <p class="text-xs text-slate-500">Student: <strong id="am-student-name" class="text-slate-800">Student</strong></p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Select Mentor</label>
+          <select id="am-mentor-select" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <!-- Injected via app.js -->
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Assignment Reason</label>
+          <input type="text" id="am-reason" placeholder="e.g. Class advisor allocation" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeAssignMentorModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitMentorAssignment()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl">Assign Mentor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Teacher -->
+  <div id="modal-create-teacher" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-base text-slate-900">Create New Teacher / Mentor Account</h3>
+        <button onclick="closeCreateTeacherModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name *</label>
+          <input type="text" id="ct-name" placeholder="e.g. Dr. Alan Turing" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Institutional Email *</label>
+          <input type="email" id="ct-email" placeholder="e.g. alan.turing@college.edu" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="ct-password" value="Password@123" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Role</label>
+            <select id="ct-role" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+              <option value="faculty">Faculty / Course Teacher</option>
+              <option value="advisor">Academic Advisor / Mentor</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Department</label>
+            <select id="ct-dept" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics">Electronics</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeCreateTeacherModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitCreateTeacher()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100">
+          Create Teacher Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Register New Student -->
+  <div id="modal-create-student" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 border border-slate-200 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-base text-slate-900">Register New Student Profile</h3>
+        <button onclick="closeCreateStudentModal()" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Roll Number *</label>
+            <input type="text" id="cs-roll" placeholder="e.g. 21CS105" class="w-full rounded-xl border border-slate-300 px-3 py-2 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Full Name *</label>
+            <input type="text" id="cs-name" placeholder="e.g. Maya Verma" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Student Email Address *</label>
+          <input type="email" id="cs-email" placeholder="e.g. maya.verma@student.edu" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Department</label>
+            <select id="cs-dept" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics">Electronics</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Semester</label>
+            <select id="cs-semester" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+              <option value="1">Sem 1</option>
+              <option value="2">Sem 2</option>
+              <option value="3">Sem 3</option>
+              <option value="4" selected>Sem 4</option>
+              <option value="5">Sem 5</option>
+              <option value="6">Sem 6</option>
+              <option value="7">Sem 7</option>
+              <option value="8">Sem 8</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Section</label>
+            <input type="text" id="cs-section" value="A" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-center uppercase">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Assign Teacher / Mentor</label>
+          <select id="cs-mentor" class="w-full rounded-xl border border-slate-300 px-3 py-2 bg-slate-50">
+            <!-- Dynamically populated from active teachers -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Current Attendance % (0-100)</label>
+            <input type="number" id="cs-attendance" min="0" max="100" value="85" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Internal Exam Marks % (0-100)</label>
+            <input type="number" id="cs-marks" min="0" max="100" value="75" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Missing Assignments (0-10)</label>
+            <input type="number" id="cs-missing" min="0" max="10" value="0" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Consecutive Absences (Days)</label>
+            <input type="number" id="cs-absences" min="0" max="15" value="0" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Student Phone</label>
+            <input type="text" id="cs-contact" placeholder="+91 98765 00000" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Parent Phone</label>
+            <input type="text" id="cs-parent" placeholder="+91 98765 99999" class="w-full rounded-xl border border-slate-300 px-3 py-2">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+        <button onclick="closeCreateStudentModal()" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+        <button onclick="submitCreateStudent()" class="px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-100">
+          Register Student Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="hidden"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

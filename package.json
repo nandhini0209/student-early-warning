@@ -1,0 +1,39 @@
+{
+  "name": "student-early-alert-system",
+  "version": "1.0.0",
+  "description": "Student Early Alert & Retention System - Full Stack Development II Project using Node.js, Express, MongoDB, and modern dashboard UI",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client": "node frontend-server.js",
+    "dev": "node server.js",
+    "seed": "node scripts/seed.js",
+    "test": "node scripts/run-verify.js",
+    "reset-teacher": "node scripts/reset-teacher.js"
+  },
+  "keywords": [
+    "mern",
+    "fsd-2",
+    "student-early-alert",
+    "retention-system",
+    "mongodb",
+    "express",
+    "academic-risk-detector"
+  ],
+  "author": "FSD-2 Student Developer",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
